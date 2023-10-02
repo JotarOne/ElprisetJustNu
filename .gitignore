@@ -1,0 +1,28 @@
+# pytest
+.pytest_cache
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+.cache
+
+pytest-*.txt
+
+# Translations
+*.mo
+
+# Visual Studio Code
+.vscode/*
+!.vscode/cSpell.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+.env
+
+# Secrets
+.lokalise_token
+
+# This is left behind by Azure Restore Cache
+tmp_cache
+
+# python-language-server / Rope
+.ropeproject
