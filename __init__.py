@@ -38,12 +38,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # epjn_api = setup_client(entry.data["username"], entry.data["password"], session)
     epjn_api = setup_client("", "", session)
 
+
     data: dict = {}
     data[VAL_CURRENT_PRICE] = 0
     data[VAL_DAY_AVERAGE_PRICE] = 0
+
+    # energy_tax: float = 0.0
+    # transfer_fee: float = 0.0
+    # if "energy_tax" in entry.data:
+    #     energy_tax = entry.data["energy_tax"]* 0.01
+    # if "transfer_fee" in entry.data:
+    #     transfer_fee = entry.data["transfer_fee"] * 0.01
+
     coordinator = FetchPriceCoordinator(
-        hass, epjn_api, entry, update_interval, data, entry.data["price_area"]
+        hass, epjn_api, entry, update_interval, data, entry.data
     )
+    # entry.data["price_area"], energy_tax, transfer_fee
 
     await coordinator.async_config_entry_first_refresh()
 

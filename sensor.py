@@ -20,14 +20,15 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .coordinator import FetchPriceCoordinator
 from .const import (
-    ATTR_EPJNED,
     DOMAIN,
-    DEFAULT_NAME,
     VAL_CURRENT_PRICE,
     VAL_DAY_AVERAGE_PRICE,
     CURRENT_PRICE,
     DAY_AVERAGE_PRICE,
     UNIT_OF_M_PRICE,
+    CURRENT_PRICE_AND_FEES,
+    DAY_AVERAGE_PRICE_AND_FEES,
+    FEES
 )
 
 
@@ -36,6 +37,7 @@ class ElprisetJustNuDescriptionMixin:
     """Mixin for required keys."""
 
     value_fn: Callable[[Any], StateType]
+    add_fees: bool
     extra_state_attributes_fn: Callable[[Any], dict[str, str]] | None
 
 
@@ -57,6 +59,7 @@ SENSOR_TYPES: tuple[ElprisetJustNuEntityDescription, ...] = (
         value_fn=lambda data: data.get(VAL_CURRENT_PRICE),
         extra_state_attributes_fn=None,
         unit_of_measurement=UNIT_OF_M_PRICE,
+        add_fees = False,
         # extra_state_attributes_fn=lambda data: {
         #     ATTR_DESCR: data[ATTR_API_AQI_DESCRIPTION],
         #     ATTR_LEVEL: data[ATTR_API_AQI_LEVEL],
@@ -70,12 +73,40 @@ SENSOR_TYPES: tuple[ElprisetJustNuEntityDescription, ...] = (
         value_fn=lambda data: data.get(VAL_DAY_AVERAGE_PRICE),
         extra_state_attributes_fn=None,
         unit_of_measurement=UNIT_OF_M_PRICE,
+        add_fees = False,
         # extra_state_attributes_fn=lambda data: {
         #     ATTR_DESCR: data[ATTR_API_AQI_DESCRIPTION],
         #     ATTR_LEVEL: data[ATTR_API_AQI_LEVEL],
         # },
     ),
-    # state_class=SensorStateClass.MEASUREMENT,
+    ElprisetJustNuEntityDescription(
+        key=CURRENT_PRICE_AND_FEES,
+        icon="mdi:cash-clock",
+        state_class=None,
+        device_class=SensorDeviceClass.MONETARY,
+        value_fn=lambda data: data.get(VAL_CURRENT_PRICE),
+        extra_state_attributes_fn=None,
+        unit_of_measurement=UNIT_OF_M_PRICE,
+        add_fees = True,
+        # extra_state_attributes_fn=lambda data: {
+        #     ATTR_DESCR: data[ATTR_API_AQI_DESCRIPTION],
+        #     ATTR_LEVEL: data[ATTR_API_AQI_LEVEL],
+        # },
+    ),
+    ElprisetJustNuEntityDescription(
+        key=DAY_AVERAGE_PRICE_AND_FEES,
+        icon="mdi:cash-clock",
+        state_class=None,
+        device_class=SensorDeviceClass.MONETARY,
+        value_fn=lambda data: data.get(VAL_DAY_AVERAGE_PRICE),
+        extra_state_attributes_fn=None,
+        unit_of_measurement=UNIT_OF_M_PRICE,
+        add_fees = True,
+        # extra_state_attributes_fn=lambda data: {
+        #     ATTR_DESCR: data[ATTR_API_AQI_DESCRIPTION],
+        #     ATTR_LEVEL: data[ATTR_API_AQI_LEVEL],
+        # },
+    ),
 )
 
 ATTRIBUTION = "Data provided by ElprisetJustNu"
@@ -130,6 +161,10 @@ class ElprisetJustNuSensor(CoordinatorEntity[FetchPriceCoordinator], SensorEntit
         self._attr_native_unit_of_measurement = description.unit_of_measurement
         if description.key == CURRENT_PRICE:
             self._attr_name = "Current price"
+        elif description.key == CURRENT_PRICE_AND_FEES:
+            self._attr_name = "Current price w fees"
+        elif description.key == DAY_AVERAGE_PRICE_AND_FEES:
+            self._attr_name = "Average day price w fees"
         else:
             self._attr_name = "Average day price"  # + coordinator.price_area
 
@@ -142,7 +177,10 @@ class ElprisetJustNuSensor(CoordinatorEntity[FetchPriceCoordinator], SensorEntit
     @property
     def native_value(self) -> StateType:
         """Return the state."""
-        return self.entity_description.value_fn(self.coordinator.data)
+        if self.entity_description.add_fees:
+            return self.entity_description.value_fn(self.coordinator.data) + self.coordinator.fees
+        else:
+            return self.entity_description.value_fn(self.coordinator.data)
 
     @property
     def extra_state_attributes(self) -> dict[str, str] | None:

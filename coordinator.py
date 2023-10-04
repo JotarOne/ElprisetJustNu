@@ -11,6 +11,10 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
+from collections.abc import Mapping
+from typing import Any
+
+
 from .const import (
     API_URL,
     DEVICE_IDENTIFIER,
@@ -18,6 +22,7 @@ from .const import (
     VAL_CURRENT_PRICE,
     VAL_DAY_AVERAGE_PRICE,
     DEFAULT_NAME,
+    FEES
 )
 from .elprisetjustnu_client import ElprisetJustNuClient
 
@@ -37,7 +42,7 @@ class FetchPriceCoordinator(DataUpdateCoordinator):
         config_entry: ConfigEntry,
         fetch_interval: timedelta,
         sensor_data: dict,
-        price_area: str,
+        entry_data: Mapping[str, Any],
     ) -> None:
         # self.data = {}
         """Initialize my coordinator."""
@@ -59,8 +64,19 @@ class FetchPriceCoordinator(DataUpdateCoordinator):
         self.entry_prefix = "elprisetjustnu"
         self.fetch_interval = fetch_interval
         self.current_data: list[ElprisetJustNuClient.PriceInfo] = []
-        self.price_area = price_area
+        self.entry_data = entry_data
+
         self.last_fetch = datetime.now()
+        self.price_area = entry_data["price_area"]
+
+        # self.energy_tax = data["energy_tax"],
+        # self.transfer_fee = data["transfer_fee"]
+        # self.sensor_data[FEES] = self.fees
+
+        # price_area: str,
+        # energy_tax: float,
+        # transfer_fee: float
+
 
     async def _async_update_data(self):
         """Update data via library."""
@@ -164,3 +180,7 @@ class FetchPriceCoordinator(DataUpdateCoordinator):
             name=DEFAULT_NAME + " " + self.price_area,
             configuration_url=str(configuration_url),
         )
+    @property
+    def fees(self) -> float:
+        # return self.transfer_fee + self.energy_tax
+        return (self.entry_data["transfer_fee"] * 0.01) + (self.entry_data["energy_tax"] * 0.01)

@@ -3,10 +3,23 @@
     "step": {
       "user": {
         "data": {
-          "host": "[%key:common::config_flow::data::host%]",
-          "username": "[%key:common::config_flow::data::username%]",
-          "password": "[%key:common::config_flow::data::password%]",
-          "poll_time": "Poll interval (seconds)"
+          "poll_time": "Poll interval (seconds)",
+          "price_area": "Pricing area",
+          "energy_tax": "Energy tax (sw öre)",
+          "transfer_fee": "Transfer fee (sw öre)"
+        }
+      }
+    },
+    "options": {
+      "step": {
+        "init": {
+          "description": "Configure settings",
+          "data": {
+            "poll_time": "Poll interval (seconds)",
+            "price_area": "Pricing area",
+            "energy_tax": "Energy tax (sw öre)",
+            "transfer_fee": "Transfer fee (sw öre)"
+          }
         }
       }
     },

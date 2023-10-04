@@ -1,22 +1,35 @@
 {
-    "config": {
-        "abort": {
-            "already_configured": "Device is already configured"
-        },
-        "error": {
-            "cannot_connect": "Failed to connect",
-            "invalid_auth": "Invalid authentication",
-            "unknown": "Unexpected error"
-        },
-        "step": {
-            "user": {
-                "data": {
-                    "host": "Host",
-                    "password": "Password",
-                    "poll_time": "Poll interval (seconds)",
-                    "username": "Username"
-                }
-            }
+  "config": {
+    "abort": {
+      "already_configured": "Device is already configured"
+    },
+    "error": {
+      "cannot_connect": "Failed to connect",
+      "invalid_auth": "Invalid authentication",
+      "unknown": "Unexpected error"
+    },
+    "step": {
+      "user": {
+        "data": {
+          "poll_time": "Poll interval (seconds)",
+          "price_area": "Pricing area",
+          "energy_tax": "Energy tax (sw öre)",
+          "transfer_fee": "Transfer fee (sw öre)"
         }
+      }
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Configure settings",
+        "data": {
+          "poll_time": "Poll interval (seconds)",
+          "price_area": "Pricing area",
+          "energy_tax": "Energy tax (sw öre)",
+          "transfer_fee": "Transfer fee (sw öre)"
+        }
+      }
+    }
+  }
 }
