@@ -38,6 +38,7 @@ class ElprisetJustNuDescriptionMixin:
 
     value_fn: Callable[[Any], StateType]
     add_fees: bool
+    elpriset_default_measurement: str
     extra_state_attributes_fn: Callable[[Any], dict[str, str]] | None
     price_state_attributes_fn: Callable[[Any], dict] | None
 
@@ -52,11 +53,11 @@ SENSOR_TYPES: tuple[ElprisetJustNuEntityDescription, ...] = (
     ElprisetJustNuEntityDescription(
         key=CURRENT_PRICE,
         icon="mdi:cash-clock",
-        state_class=None,
+        state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.MONETARY,
         value_fn=lambda data: data.get(VAL_CURRENT_PRICE),
         extra_state_attributes_fn=None,
-        unit_of_measurement=UNIT_OF_M_PRICE,
+        elpriset_default_measurement=UNIT_OF_M_PRICE,
         add_fees = False,
         price_state_attributes_fn=lambda coordinator: {
              DAY_PRICES: coordinator.getPrices(),
@@ -69,11 +70,11 @@ SENSOR_TYPES: tuple[ElprisetJustNuEntityDescription, ...] = (
     ElprisetJustNuEntityDescription(
         key=DAY_AVERAGE_PRICE,
         icon="mdi:cash-clock",
-        state_class=None,
+        state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.MONETARY,
         value_fn=lambda data: data.get(VAL_DAY_AVERAGE_PRICE),
         extra_state_attributes_fn=None,
-        unit_of_measurement=UNIT_OF_M_PRICE,
+        elpriset_default_measurement=UNIT_OF_M_PRICE,
         add_fees = False,
         price_state_attributes_fn = None,
         # extra_state_attributes_fn=lambda data: {
@@ -84,11 +85,11 @@ SENSOR_TYPES: tuple[ElprisetJustNuEntityDescription, ...] = (
     ElprisetJustNuEntityDescription(
         key=CURRENT_PRICE_AND_FEES,
         icon="mdi:cash-clock",
-        state_class=None,
+        state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.MONETARY,
         value_fn=lambda data: data.get(VAL_CURRENT_PRICE),
         extra_state_attributes_fn=None,
-        unit_of_measurement=UNIT_OF_M_PRICE,
+        elpriset_default_measurement=UNIT_OF_M_PRICE,
         add_fees = True,
         price_state_attributes_fn = None,
         # extra_state_attributes_fn=lambda data: {
@@ -99,11 +100,11 @@ SENSOR_TYPES: tuple[ElprisetJustNuEntityDescription, ...] = (
     ElprisetJustNuEntityDescription(
         key=DAY_AVERAGE_PRICE_AND_FEES,
         icon="mdi:cash-clock",
-        state_class=None,
+        state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.MONETARY,
         value_fn=lambda data: data.get(VAL_DAY_AVERAGE_PRICE),
         extra_state_attributes_fn=None,
-        unit_of_measurement=UNIT_OF_M_PRICE,
+        elpriset_default_measurement=UNIT_OF_M_PRICE,
         add_fees = True,
         price_state_attributes_fn = None,
         # extra_state_attributes_fn=lambda data: {
@@ -159,7 +160,7 @@ class ElprisetJustNuSensor(CoordinatorEntity[FetchPriceCoordinator], SensorEntit
         super().__init__(coordinator)
         self.entity_description = description
 
-        self._attr_native_unit_of_measurement = description.unit_of_measurement
+        self._attr_native_unit_of_measurement = description.elpriset_default_measurement
         if description.key == CURRENT_PRICE:
             self._attr_name = "Current price"
         elif description.key == CURRENT_PRICE_AND_FEES:
