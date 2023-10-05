@@ -10,5 +10,6 @@ DEFAULT_NAME = "ElprisetJustNu"
 VAL_CURRENT_PRICE = "current_price"
 VAL_DAY_AVERAGE_PRICE = "day_average_price"
 API_URL = "https://www.elprisetjustnu.se"
-UNIT_OF_M_PRICE = "SEK/kWh",
+UNIT_OF_M_PRICE = "SEK",
 FEES = "fees"
+DAY_PRICES = "day_prices"

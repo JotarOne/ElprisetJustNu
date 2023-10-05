@@ -31,7 +31,6 @@ class ElprisetJustNuClient:
         @dataclass
         class Price:
             """Price class."""
-
             hour: int
             price: float
 

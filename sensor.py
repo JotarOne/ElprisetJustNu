@@ -28,7 +28,7 @@ from .const import (
     UNIT_OF_M_PRICE,
     CURRENT_PRICE_AND_FEES,
     DAY_AVERAGE_PRICE_AND_FEES,
-    FEES
+    DAY_PRICES
 )
 
 
@@ -39,6 +39,7 @@ class ElprisetJustNuDescriptionMixin:
     value_fn: Callable[[Any], StateType]
     add_fees: bool
     extra_state_attributes_fn: Callable[[Any], dict[str, str]] | None
+    price_state_attributes_fn: Callable[[Any], dict] | None
 
 
 @dataclass
@@ -46,9 +47,6 @@ class ElprisetJustNuEntityDescription(
     SensorEntityDescription, ElprisetJustNuDescriptionMixin
 ):
     """Describes sensor entity."""
-
-    # value_fn=lambda data: data.get(VAL_CURRENT_PRICE),
-
 
 SENSOR_TYPES: tuple[ElprisetJustNuEntityDescription, ...] = (
     ElprisetJustNuEntityDescription(
@@ -60,6 +58,9 @@ SENSOR_TYPES: tuple[ElprisetJustNuEntityDescription, ...] = (
         extra_state_attributes_fn=None,
         unit_of_measurement=UNIT_OF_M_PRICE,
         add_fees = False,
+        price_state_attributes_fn=lambda coordinator: {
+             DAY_PRICES: coordinator.getPrices(),
+        },
         # extra_state_attributes_fn=lambda data: {
         #     ATTR_DESCR: data[ATTR_API_AQI_DESCRIPTION],
         #     ATTR_LEVEL: data[ATTR_API_AQI_LEVEL],
@@ -74,6 +75,7 @@ SENSOR_TYPES: tuple[ElprisetJustNuEntityDescription, ...] = (
         extra_state_attributes_fn=None,
         unit_of_measurement=UNIT_OF_M_PRICE,
         add_fees = False,
+        price_state_attributes_fn = None,
         # extra_state_attributes_fn=lambda data: {
         #     ATTR_DESCR: data[ATTR_API_AQI_DESCRIPTION],
         #     ATTR_LEVEL: data[ATTR_API_AQI_LEVEL],
@@ -88,6 +90,7 @@ SENSOR_TYPES: tuple[ElprisetJustNuEntityDescription, ...] = (
         extra_state_attributes_fn=None,
         unit_of_measurement=UNIT_OF_M_PRICE,
         add_fees = True,
+        price_state_attributes_fn = None,
         # extra_state_attributes_fn=lambda data: {
         #     ATTR_DESCR: data[ATTR_API_AQI_DESCRIPTION],
         #     ATTR_LEVEL: data[ATTR_API_AQI_LEVEL],
@@ -102,6 +105,7 @@ SENSOR_TYPES: tuple[ElprisetJustNuEntityDescription, ...] = (
         extra_state_attributes_fn=None,
         unit_of_measurement=UNIT_OF_M_PRICE,
         add_fees = True,
+        price_state_attributes_fn = None,
         # extra_state_attributes_fn=lambda data: {
         #     ATTR_DESCR: data[ATTR_API_AQI_DESCRIPTION],
         #     ATTR_LEVEL: data[ATTR_API_AQI_LEVEL],
@@ -155,9 +159,6 @@ class ElprisetJustNuSensor(CoordinatorEntity[FetchPriceCoordinator], SensorEntit
         super().__init__(coordinator)
         self.entity_description = description
 
-        # self.unit_of_measurement = description.unit_of_measurement
-        # _attr_native_unit_of_measurement = description.unit_of_measurement
-        # self.native_unit_of_measurement = description.unit_of_measurement
         self._attr_native_unit_of_measurement = description.unit_of_measurement
         if description.key == CURRENT_PRICE:
             self._attr_name = "Current price"
@@ -189,4 +190,7 @@ class ElprisetJustNuSensor(CoordinatorEntity[FetchPriceCoordinator], SensorEntit
             return self.entity_description.extra_state_attributes_fn(
                 self.coordinator.data
             )
+        if self.entity_description.price_state_attributes_fn:
+            ret =  self.entity_description.price_state_attributes_fn(self.coordinator)
+            return ret
         return None

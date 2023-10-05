@@ -54,10 +54,7 @@ class FetchPriceCoordinator(DataUpdateCoordinator):
             # Polling interval. Will only be polled if there are subscribers.
             update_interval=timedelta(seconds=10),
         )
-        self.sensor_data = (
-            sensor_data  # hass.data[DOMAIN][config_entry.entry_id]["data"]
-        )
-        # homeassistant.util.dt.utcnow()
+        self.sensor_data = sensor_data
         self.config_entry = config_entry
         self.epjn_api = epjn_api
         self.epjn_data_today = ""
@@ -69,15 +66,6 @@ class FetchPriceCoordinator(DataUpdateCoordinator):
         self.last_fetch = datetime.now()
         self.price_area = entry_data["price_area"]
 
-        # self.energy_tax = data["energy_tax"],
-        # self.transfer_fee = data["transfer_fee"]
-        # self.sensor_data[FEES] = self.fees
-
-        # price_area: str,
-        # energy_tax: float,
-        # transfer_fee: float
-
-
     async def _async_update_data(self):
         """Update data via library."""
 
@@ -88,6 +76,18 @@ class FetchPriceCoordinator(DataUpdateCoordinator):
         """Force update data via library."""
         self.current_data = None
         self.async_refresh()
+
+    def getPrices(self) -> list[dict]:
+        dteToday: datetime = datetime.now(gettz(self.hass.config.time_zone))
+        ret = list[dict]()
+        if self.current_data is not None and len(self.current_data) > 0:
+            for x in reversed(self.current_data):
+                if x.dte >= dteToday.date():
+                    for p in x.prices:
+                        ret.append({"date": (datetime.combine(x.dte, datetime.min.time()) + timedelta(hours=p.hour)).strftime("%Y-%m-%d %H:%M:%S"), "value": p.price})
+                        # ret[(datetime.combine(x.dte, datetime.min.time()) + timedelta(hours=p.hour)).strftime("%Y-%m-%d %H:%M:%S")] = p.price
+
+        return ret
 
     async def checkData(self):
         """Check data validity."""
@@ -183,4 +183,11 @@ class FetchPriceCoordinator(DataUpdateCoordinator):
     @property
     def fees(self) -> float:
         # return self.transfer_fee + self.energy_tax
-        return (self.entry_data["transfer_fee"] * 0.01) + (self.entry_data["energy_tax"] * 0.01)
+        tf: float = 0
+        et: float = 0
+        if "transfer_fee" in self.entry_data:
+            tf = self.entry_data["transfer_fee"]
+        if "energy_tax" in self.entry_data:
+            et = self.entry_data["energy_tax"]
+
+        return (tf * 0.01) + (et * 0.01)
